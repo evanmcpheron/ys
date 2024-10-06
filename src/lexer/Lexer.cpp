@@ -125,7 +125,7 @@ void Lexer::skipWhitespaceAndComments() {
 
 Token Lexer::identifierOrKeyword(char firstChar) {
     string lexeme(1, firstChar);
-    while (!isAtEnd() && (isalnum(peek()) || peek() == '_')) {
+    while (!isAtEnd() && (isalnum(peekNext()) || peekNext() == '_')) {
         lexeme += advance();
     }
 
@@ -137,7 +137,15 @@ Token Lexer::identifierOrKeyword(char firstChar) {
         type = it->second;
     }
 
-    return Token{type, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
+    if (lexeme == "let") {
+        return Token{TokenType::LET, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
+    } else if (lexeme == "const") {
+        return Token{TokenType::CONST, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
+    } else if (lexeme == "var") {
+        return Token{TokenType::VAR, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
+    } else {
+        return Token{type, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
+    }
 }
 
 bool Lexer::isIdentifierStart(char firstChar) {

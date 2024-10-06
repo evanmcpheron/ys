@@ -13,42 +13,50 @@
 #include "src/parser/Parser.h"
 
 int main(int argc, char *argv[]) {
-    string sourceCode;
+    std::string sourceCode;
 
-    // Read from standard input
-    cout << "Enter your code > " << endl;
+    // Check if a file was provided
+    if (argc > 1) {
+        std::ifstream file(argv[1]);
+        if (!file) {
+            std::cerr << "Could not open file: " << argv[1] << std::endl;
+            return 1;
+        }
 
-    getline(cin, sourceCode);
-    cout << sourceCode << endl;
+        // Read the file contents into the sourceCode string
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        sourceCode = buffer.str();
+        file.close();
+    } else {
+        // If no file is provided, fallback to standard input
+        std::cout << "Enter your code > " << std::endl;
+        std::getline(std::cin, sourceCode);
+    }
+
     // 1. Tokenize the source code
     Lexer lexer(sourceCode);
-    vector<Token> tokens = lexer.tokenize();
+    std::vector<Token> tokens = lexer.tokenize();
 
     // Optional: Print tokens for debugging
     for (const Token &token: tokens) {
-        cout << "Token(Type: " << static_cast<int>(token.type) << ", Value: '" << token.value << "', Line: " << token.line << ", Column: " << token.
-                column << ")" << endl;
+        std::cout << "Token(Type: " << static_cast<int>(token.type) << ", Value: '" << token.value << "', Line: " << token.line << ", Column: " <<
+                token.column << ")" << std::endl;
     }
 
     // 2. Parse the tokens into an AST
-    cout << "\nStarting to parse tokens..." << endl;
+    std::cout << "\nStarting to parse tokens..." << std::endl;
     Parser parser(tokens);
-    vector<unique_ptr<Statement> > statements;
+    std::vector<std::unique_ptr<Statement> > statements;
     try {
         statements = parser.parse();
-        cout << "Parsing successful!" << endl;
-    } catch (const runtime_error &error) {
-        cerr << "Parsing error: " << error.what() << endl;
+        std::cout << "Parsing successful!" << std::endl;
+    } catch (const std::runtime_error &error) {
+        std::cerr << "Parsing error: " << error.what() << std::endl;
         return 1;
     }
 
-    cout << "\nParsed Statements:" << endl;
-
-
-    //
-    // // Optional: Implement a way to print or visualize the AST for debugging
-    //
-    // // 3. Interpret the AST
+    // 3. Interpret the AST
     Interpreter interpreter;
     interpreter.interpret(statements);
 
