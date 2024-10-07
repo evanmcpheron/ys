@@ -183,7 +183,7 @@ Token Lexer::numberLiteral(char firstChar) {
         }
     }
 
-    TokenType type = isFloat ? TokenType::FLOAT_LITERAL : TokenType::INTEGER_LITERAL;
+    TokenType type = isFloat ? TokenType::DOUBLE_LITERAL : TokenType::INTEGER_LITERAL;
 
     return Token{type, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
 }

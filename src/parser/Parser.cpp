@@ -68,6 +68,7 @@ unique_ptr<Statement> Parser::declaration() {
             return statement();
         }
     } catch (const runtime_error &) {
+        cout << "Parser Error" << endl;
         synchronize();
         return nullptr;
     }
@@ -199,7 +200,7 @@ unique_ptr<Statement> Parser::forStatement() {
     }
 
     if (!condition) {
-        condition = make_unique<LiteralExpression>(LiteralExpression::Type::Boolean, "true");
+        condition = make_unique<LiteralExpression>(TokenType::BOOLEAN_LITERAL, make_shared<BoolValue>(true));
     }
 
     body = make_unique<WhileStatement>(move(condition), move(body));
@@ -249,8 +250,8 @@ unique_ptr<Expression> Parser::assignment() {
     auto expr = logicalOr();
 
     if (match({
-        TokenType::ASSIGN, TokenType::PLUS_ASSIGN, TokenType::MINUS_ASSIGN, TokenType::MULTIPLY_ASSIGN, TokenType::DIVIDE_ASSIGN,
-        TokenType::MODULO_ASSIGN
+        TokenType::ASSIGN, TokenType::PLUS_ASSIGN, TokenType::MINUS_ASSIGN, TokenType::MULTIPLY_ASSIGN,
+        TokenType::DIVIDE_ASSIGN, TokenType::MODULO_ASSIGN
     })) {
         Token op = previous();
         auto value = assignment();
@@ -299,19 +300,19 @@ unique_ptr<Expression> Parser::equality() {
         BinaryExpression::Operator binaryOp;
         switch (op.type) {
             case TokenType::EQUAL:
-                binaryOp = BinaryExpression::Operator::Equal;
+                binaryOp = BinaryExpression::Operator::EQUAL;
                 break;
             case TokenType::NOT_EQUAL:
-                binaryOp = BinaryExpression::Operator::NotEqual;
+                binaryOp = BinaryExpression::Operator::NOT_EQUAL;
                 break;
             case TokenType::STRICT_EQUAL:
-                binaryOp = BinaryExpression::Operator::StrictEqual;
+                binaryOp = BinaryExpression::Operator::STRICT_EQUAL;
                 break;
             case TokenType::STRICT_NOT_EQUAL:
-                binaryOp = BinaryExpression::Operator::StrictNotEqual;
+                binaryOp = BinaryExpression::Operator::STRICT_NOT_EQUAL;
                 break;
             default:
-                binaryOp = BinaryExpression::Operator::Unknown;
+                binaryOp = BinaryExpression::Operator::UNKNOWN;
                 break;
         }
         expr = make_unique<BinaryExpression>(move(expr), binaryOp, move(right));
@@ -329,19 +330,19 @@ unique_ptr<Expression> Parser::comparison() {
         BinaryExpression::Operator binaryOp;
         switch (op.type) {
             case TokenType::LESS_THAN:
-                binaryOp = BinaryExpression::Operator::Less;
+                binaryOp = BinaryExpression::Operator::LESS;
                 break;
             case TokenType::LESS_EQUAL:
-                binaryOp = BinaryExpression::Operator::LessEqual;
+                binaryOp = BinaryExpression::Operator::LESS_EQUAL;
                 break;
             case TokenType::GREATER_THAN:
-                binaryOp = BinaryExpression::Operator::Greater;
+                binaryOp = BinaryExpression::Operator::GREATER;
                 break;
             case TokenType::GREATER_EQUAL:
-                binaryOp = BinaryExpression::Operator::GreaterEqual;
+                binaryOp = BinaryExpression::Operator::GREATER_EQUAL;
                 break;
             default:
-                binaryOp = BinaryExpression::Operator::Unknown;
+                binaryOp = BinaryExpression::Operator::UNKNOWN;
                 break;
         }
         expr = make_unique<BinaryExpression>(move(expr), binaryOp, move(right));
@@ -356,7 +357,9 @@ unique_ptr<Expression> Parser::term() {
     while (match({TokenType::PLUS, TokenType::MINUS})) {
         Token op = previous();
         auto right = factor();
-        BinaryExpression::Operator binaryOp = (op.type == TokenType::PLUS) ? BinaryExpression::Operator::Add : BinaryExpression::Operator::Subtract;
+        BinaryExpression::Operator binaryOp = (op.type == TokenType::PLUS)
+                                                  ? BinaryExpression::Operator::ADD
+                                                  : BinaryExpression::Operator::SUBTRACT;
         expr = make_unique<BinaryExpression>(move(expr), binaryOp, move(right));
     }
 
@@ -372,16 +375,16 @@ unique_ptr<Expression> Parser::factor() {
         BinaryExpression::Operator binaryOp;
         switch (op.type) {
             case TokenType::MULTIPLY:
-                binaryOp = BinaryExpression::Operator::Multiply;
+                binaryOp = BinaryExpression::Operator::MULTIPLY;
                 break;
             case TokenType::DIVIDE:
-                binaryOp = BinaryExpression::Operator::Divide;
+                binaryOp = BinaryExpression::Operator::DIVIDE;
                 break;
             case TokenType::MODULO:
-                binaryOp = BinaryExpression::Operator::Modulo;
+                binaryOp = BinaryExpression::Operator::MODULO;
                 break;
             default:
-                binaryOp = BinaryExpression::Operator::Unknown;
+                binaryOp = BinaryExpression::Operator::UNKNOWN;
                 break;
         }
         expr = make_unique<BinaryExpression>(move(expr), binaryOp, move(right));
@@ -394,7 +397,9 @@ unique_ptr<Expression> Parser::unary() {
     if (match({TokenType::LOGICAL_NOT, TokenType::MINUS})) {
         Token op = previous();
         auto right = unary();
-        UnaryExpression::Operator unaryOp = (op.type == TokenType::LOGICAL_NOT) ? UnaryExpression::Operator::Not : UnaryExpression::Operator::Negate;
+        UnaryExpression::Operator unaryOp = (op.type == TokenType::LOGICAL_NOT)
+                                                ? UnaryExpression::Operator::Not
+                                                : UnaryExpression::Operator::Negate;
         return make_unique<UnaryExpression>(unaryOp, move(right));
     }
 
@@ -402,7 +407,7 @@ unique_ptr<Expression> Parser::unary() {
 }
 
 unique_ptr<Expression> Parser::call() {
-    auto expr = primary();
+    unique_ptr<Expression> expr = primary();
 
     while (true) {
         if (match({TokenType::LEFT_PAREN})) {
@@ -432,19 +437,22 @@ unique_ptr<Expression> Parser::finishCall(unique_ptr<Expression> callee) {
 
 unique_ptr<Expression> Parser::primary() {
     if (match({TokenType::BOOLEAN_LITERAL})) {
-        return make_unique<LiteralExpression>(LiteralExpression::Type::Boolean, previous().value);
+        return make_unique<LiteralExpression>(TokenType::BOOLEAN_LITERAL,
+                                              make_shared<BoolValue>(previous().value == "true" ? true : false));
     }
     if (match({TokenType::NULL_LITERAL})) {
-        return make_unique<LiteralExpression>(LiteralExpression::Type::Null, "null");
+        return make_unique<LiteralExpression>(TokenType::NULL_LITERAL, nullptr);
     }
     if (match({TokenType::INTEGER_LITERAL})) {
-        return make_unique<LiteralExpression>(LiteralExpression::Type::Integer, previous().value);
+        return make_unique<LiteralExpression>(TokenType::INTEGER_LITERAL,
+                                              make_shared<IntValue>(stoi(previous().value)));
     }
-    if (match({TokenType::FLOAT_LITERAL})) {
-        return make_unique<LiteralExpression>(LiteralExpression::Type::Float, previous().value);
+    if (match({TokenType::DOUBLE_LITERAL})) {
+        return make_unique<LiteralExpression>(TokenType::DOUBLE_LITERAL,
+                                              make_shared<DoubleValue>(stod(previous().value)));
     }
     if (match({TokenType::STRING_LITERAL})) {
-        return make_unique<LiteralExpression>(LiteralExpression::Type::String, previous().value);
+        return make_unique<LiteralExpression>(TokenType::STRING_LITERAL, make_shared<StringValue>(previous().value));
     }
     if (match({TokenType::IDENTIFIER})) {
         return make_unique<IdentifierExpression>(previous().value);
@@ -487,5 +495,8 @@ void Parser::synchronize() {
 }
 
 void Parser::error(const Token &token, const string &message) {
-    cerr << "[Line " << token.line << ", Column " << token.column << "] Error at '" << token.value << "': " << message << endl;
+    cerr << "[Line " << token.line << ", Column " << token.column << "] Error at '" << token.value << "': " << message
+            << endl;
 }
+
+

@@ -76,10 +76,14 @@ private:
     // The environment representing the current scope
     shared_ptr<Environment> environment_;
 
+    Value lastValue = Value();
+
     // Helper methods
     void executeBlock(const vector<unique_ptr<Statement> > &statements, shared_ptr<Environment> newEnvironment);
 
     bool isTruthy(const Value &value);
+
+    void setLastValue(const Value &value);
 };
 
 #endif // INTERPRETER_H

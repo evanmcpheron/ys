@@ -2,15 +2,16 @@
 #define AST_H
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <memory>
 
-#include "../value/Value.h"
 #include "../visitor/Visitor.h"
 #include "../../include/Token.h"
 
 
 using namespace std;
+class ValueType;
 class Visitor;
 
 // Forward declaration for Visitor
@@ -30,28 +31,24 @@ public:
 class Expression : public ASTNode {
 };
 
-// Literal expressions
 class LiteralExpression : public Expression {
 public:
-    enum class Type {
-        Integer,
-        Float,
-        String,
-        Boolean,
-        Null
-    };
+    LiteralExpression(const TokenType type, shared_ptr<ValueType> value)
+        : type_(type), value_(move(value)) {
+    }
 
-    LiteralExpression(Type type, string value);
 
     void accept(Visitor &visitor) override;
 
-    [[nodiscard]] auto getType() const -> Type;
+    [[nodiscard]] TokenType getType() const;
 
-    [[nodiscard]] const string &getValue() const;
+    [[nodiscard]] shared_ptr<ValueType> getValue() const {
+        return value_;
+    }
 
 private:
-    Type type_;
-    string value_;
+    TokenType type_;
+    shared_ptr<ValueType> value_;
 };
 
 // Identifier expressions
@@ -71,11 +68,11 @@ private:
 class BinaryExpression : public Expression {
 public:
     enum class Operator {
-        Add, Subtract, Multiply, Divide, Modulo,
-        Equal, NotEqual, StrictEqual, StrictNotEqual,
-        Less, LessEqual, Greater, GreaterEqual,
-        LogicalAnd, LogicalOr,
-        Unknown
+        ADD, SUBTRACT, MULTIPLY, DIVIDE, MODULO,
+        EQUAL, NOT_EQUAL, STRICT_EQUAL, STRICT_NOT_EQUAL,
+        LESS, LESS_EQUAL, GREATER, GREATER_EQUAL,
+        LOGICAL_AND, LOGICAL_OR,
+        UNKNOWN
     };
 
     BinaryExpression(unique_ptr<Expression> left, Operator op, unique_ptr<Expression> right);
@@ -298,7 +295,8 @@ public:
         string typeName;
     };
 
-    FunctionDeclaration(string name, vector<Parameter> parameters, string returnTypeName, unique_ptr<BlockStatement> body);
+    FunctionDeclaration(string name, vector<Parameter> parameters, string returnTypeName,
+                        unique_ptr<BlockStatement> body);
 
     void accept(Visitor &visitor) override;
 

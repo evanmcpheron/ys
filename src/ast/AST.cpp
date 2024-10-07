@@ -1,5 +1,6 @@
 #include "AST.h"
 
+#include <iostream>
 #include <utility>
 #include "../visitor/Visitor.h"
 
@@ -7,21 +8,16 @@
 // LiteralExpression
 // ********************
 
-LiteralExpression::LiteralExpression(Type type, string value)
-    : type_(type), value_(move(value)) {
-}
 
 void LiteralExpression::accept(Visitor &visitor) {
+    cout << "LiteralExpression::accept(Visitor &visitor)" << endl;
     visitor.visitLiteralExpression(this);
 }
 
-LiteralExpression::Type LiteralExpression::getType() const {
+TokenType LiteralExpression::getType() const {
     return type_;
 }
 
-const string &LiteralExpression::getValue() const {
-    return value_;
-}
 
 // ********************
 // IdentifierExpression
@@ -32,6 +28,7 @@ IdentifierExpression::IdentifierExpression(string name)
 }
 
 void IdentifierExpression::accept(Visitor &visitor) {
+    cout << "IdentifierExpression::accept(Visitor &visitor)" << endl;
     visitor.visitIdentifierExpression(this);
 }
 
@@ -48,6 +45,7 @@ BinaryExpression::BinaryExpression(unique_ptr<Expression> left, Operator op, uni
 }
 
 void BinaryExpression::accept(Visitor &visitor) {
+    cout << "BinaryExpression::accept(Visitor &visitor)" << endl;
     visitor.visitBinaryExpression(this);
 }
 
@@ -72,6 +70,7 @@ UnaryExpression::UnaryExpression(Operator op, unique_ptr<Expression> right)
 }
 
 void UnaryExpression::accept(Visitor &visitor) {
+    cout << "UnaryExpression::accept(Visitor &visitor)" << endl;
     visitor.visitUnaryExpression(this);
 }
 
@@ -92,6 +91,7 @@ AssignmentExpression::AssignmentExpression(string name, unique_ptr<Expression> v
 }
 
 void AssignmentExpression::accept(Visitor &visitor) {
+    cout << "AssignmentExpression::accept(Visitor &visitor)" << endl;
     visitor.visitAssignmentExpression(this);
 }
 
@@ -116,6 +116,7 @@ LogicalExpression::LogicalExpression(unique_ptr<Expression> left, Operator op, u
 }
 
 void LogicalExpression::accept(Visitor &visitor) {
+    cout << "LogicalExpression::accept(Visitor &visitor)" << endl;
     visitor.visitLogicalExpression(this);
 }
 
@@ -140,6 +141,7 @@ FunctionCallExpression::FunctionCallExpression(unique_ptr<Expression> callee, ve
 }
 
 void FunctionCallExpression::accept(Visitor &visitor) {
+    cout << "FunctionCallExpression::accept(Visitor &visitor)" << endl;
     visitor.visitFunctionCallExpression(this);
 }
 
@@ -160,6 +162,7 @@ GetExpression::GetExpression(unique_ptr<Expression> object, string name)
 }
 
 void GetExpression::accept(Visitor &visitor) {
+    cout << "GetExpression::accept(Visitor &visitor)" << endl;
     visitor.visitGetExpression(this);
 }
 
@@ -180,6 +183,7 @@ ExpressionStatement::ExpressionStatement(unique_ptr<Expression> expression)
 }
 
 void ExpressionStatement::accept(Visitor &visitor) {
+    cout << "ExpressionStatement::accept(Visitor &visitor)" << endl;
     visitor.visitExpressionStatement(this);
 }
 
@@ -196,6 +200,7 @@ VariableDeclaration::VariableDeclaration(string name, string typeName, unique_pt
 }
 
 void VariableDeclaration::accept(Visitor &visitor) {
+    cout << "VariableDeclaration::accept(Visitor &visitor)" << endl;
     visitor.visitVariableDeclaration(this);
 }
 
@@ -220,6 +225,7 @@ BlockStatement::BlockStatement(vector<unique_ptr<Statement> > statements)
 }
 
 void BlockStatement::accept(Visitor &visitor) {
+    cout << "BlockStatement::accept(Visitor &visitor)" << endl;
     visitor.visitBlockStatement(this);
 }
 
@@ -231,11 +237,13 @@ const vector<unique_ptr<Statement> > &BlockStatement::getStatements() const {
 // IfStatement
 // ********************
 
-IfStatement::IfStatement(unique_ptr<Expression> condition, unique_ptr<Statement> thenBranch, unique_ptr<Statement> elseBranch)
+IfStatement::IfStatement(unique_ptr<Expression> condition, unique_ptr<Statement> thenBranch,
+                         unique_ptr<Statement> elseBranch)
     : condition_(move(condition)), thenBranch_(move(thenBranch)), elseBranch_(move(elseBranch)) {
 }
 
 void IfStatement::accept(Visitor &visitor) {
+    cout << "IfStatement::accept(Visitor &visitor)" << endl;
     visitor.visitIfStatement(this);
 }
 
@@ -260,6 +268,7 @@ WhileStatement::WhileStatement(unique_ptr<Expression> condition, unique_ptr<Stat
 }
 
 void WhileStatement::accept(Visitor &visitor) {
+    cout << "WhileStatement::accept(Visitor &visitor)" << endl;
     visitor.visitWhileStatement(this);
 }
 
@@ -280,6 +289,7 @@ ReturnStatement::ReturnStatement(unique_ptr<Expression> value)
 }
 
 void ReturnStatement::accept(Visitor &visitor) {
+    cout << "ReturnStatement::accept(Visitor &visitor)" << endl;
     visitor.visitReturnStatement(this);
 }
 
@@ -291,11 +301,13 @@ Expression *ReturnStatement::getValue() const {
 // FunctionDeclaration
 // ********************
 
-FunctionDeclaration::FunctionDeclaration(string name, vector<Parameter> parameters, string returnTypeName, unique_ptr<BlockStatement> body)
+FunctionDeclaration::FunctionDeclaration(string name, vector<Parameter> parameters, string returnTypeName,
+                                         unique_ptr<BlockStatement> body)
     : name_(move(name)), parameters_(move(parameters)), returnTypeName_(move(returnTypeName)), body_(move(body)) {
 }
 
 void FunctionDeclaration::accept(Visitor &visitor) {
+    cout << "FunctionDeclaration::accept(Visitor &visitor)" << endl;
     return visitor.visitFunctionDeclaration(this);
 }
 
