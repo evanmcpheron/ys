@@ -23,28 +23,6 @@ public:
     [[nodiscard]] virtual ValueType *clone() const = 0;
 };
 
-// Derived classes for specific value types
-
-class IntValue final : public ValueType {
-    int value_;
-
-public:
-    explicit IntValue(int value) : value_(value) {
-    }
-
-    void printValue() const override {
-        cout << value_ << endl;
-    }
-
-    [[nodiscard]] ValueType *clone() const override {
-        return new IntValue(*this);
-    }
-
-    [[nodiscard]] int getBaseValue() const {
-        return value_;
-    }
-};
-
 class StringValue final : public ValueType {
     string value_;
 
@@ -123,11 +101,6 @@ public:
 // Value class that holds a shared pointer to a ValueType
 class Value {
 public:
-    // Constructors for various value types
-    explicit Value(int integer, TokenType tokenType = TokenType::INTEGER_LITERAL)
-        : type(tokenType), value(make_shared<IntValue>(integer)) {
-    }
-
     explicit Value(double floating, TokenType tokenType = TokenType::DOUBLE_COLON)
         : type(tokenType), value(make_shared<DoubleValue>(floating)) {
     }
@@ -185,8 +158,6 @@ public:
             return false;
         }
         switch (type) {
-            case TokenType::INTEGER_LITERAL:
-                return this->asInt() == other.asInt();
             case TokenType::DOUBLE_LITERAL:
                 return this->asDouble() == other.asDouble();
             case TokenType::STRING_LITERAL:
@@ -203,7 +174,6 @@ public:
     // Type checking methods
     bool isNull() const { return type == TokenType::NULL_LITERAL; }
     bool isBool() const { return dynamic_cast<BoolValue *>(value.get()) != nullptr; }
-    bool isInt() const { return dynamic_cast<IntValue *>(value.get()) != nullptr; }
     bool isDouble() const { return dynamic_cast<DoubleValue *>(value.get()) != nullptr; }
     bool isString() const { return dynamic_cast<StringValue *>(value.get()) != nullptr; }
 
@@ -214,14 +184,6 @@ public:
             return boolValue->getBaseValue();
         }
         throw runtime_error("Not a boolean value");
-    }
-
-    [[nodiscard]] int asInt() const {
-        auto intValue = dynamic_cast<IntValue *>(value.get());
-        if (intValue) {
-            return intValue->getBaseValue();
-        }
-        throw runtime_error("Not an integer value");
     }
 
     [[nodiscard]] double asDouble() const {

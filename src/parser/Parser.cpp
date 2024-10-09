@@ -443,10 +443,7 @@ unique_ptr<Expression> Parser::primary() {
     if (match({TokenType::NULL_LITERAL})) {
         return make_unique<LiteralExpression>(TokenType::NULL_LITERAL, nullptr);
     }
-    if (match({TokenType::INTEGER_LITERAL})) {
-        return make_unique<LiteralExpression>(TokenType::INTEGER_LITERAL,
-                                              make_shared<IntValue>(stoi(previous().value)));
-    }
+
     if (match({TokenType::DOUBLE_LITERAL})) {
         return make_unique<LiteralExpression>(TokenType::DOUBLE_LITERAL,
                                               make_shared<DoubleValue>(stod(previous().value)));

@@ -15,9 +15,9 @@ void Interpreter::interpret(const vector<unique_ptr<Statement> > &statements) {
     try {
         for (const auto &statement: statements) {
             statement->accept(*this);
+            cout << "Statement Result: " << endl;
+            this->lastValue.getValue()->printValue();
         }
-        cout << "Statement Result: " << endl;
-        this->lastValue.getValue()->printValue();
     } catch (const exception &e) {
         cerr << "Runtime error: " << e.what() << endl;
     }
@@ -55,18 +55,10 @@ Value Interpreter::visitBinaryExpression(BinaryExpression *expression) {
     double leftValue, rightValue;
 
     // Check if the left value is a number
-    if (left.isInt()) {
-        leftValue = left.isInt() ? static_cast<double>(left.asInt()) : left.asDouble();
-    } else {
-        throw runtime_error("Left operand is not a number");
-    }
+    leftValue = left.asDouble();
 
     // Check if the right value is a number
-    if (right.isInt()) {
-        rightValue = right.isInt() ? static_cast<double>(right.asInt()) : right.asDouble();
-    } else {
-        throw runtime_error("Right operand is not a number");
-    }
+    rightValue = right.asDouble();
 
     switch (expression->getOperator()) {
         case BinaryExpression::Operator::ADD: {
@@ -185,7 +177,7 @@ bool Interpreter::isTruthy(const Value &value) {
     switch (value.getType()) {
         case TokenType::BOOLEAN_LITERAL:
             return value.asBool(); // If it's a boolean, return its actual value (true or false)
-        case TokenType::INTEGER_LITERAL:
+        case TokenType::DOUBLE_LITERAL:
             return value.asDouble() != 0; // Numbers are truthy if they're not zero
         case TokenType::STRING_LITERAL:
             return !value.asString().empty(); // Non-empty strings are truthy
@@ -198,9 +190,7 @@ bool Interpreter::isTruthy(const Value &value) {
 
 void Interpreter::setLastValue(const Value &value) {
     // Handle all the types your interpreter supports
-    if (value.isInt()) {
-        this->lastValue = value; // Convert int to double for consistency
-    } else if (value.isDouble()) {
+    if (value.isDouble()) {
         this->lastValue = value; // Already a double, no conversion needed
     } else if (value.isBool()) {
         this->lastValue = value; // Set as a boolean

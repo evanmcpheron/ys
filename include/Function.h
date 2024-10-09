@@ -10,19 +10,21 @@ class Interpreter;
 class Environment;
 class FunctionDeclaration;
 
+using namespace std;
+
 class Function {
 public:
-    Function(FunctionDeclaration *declaration, std::shared_ptr<Environment> closure);
+    Function(FunctionDeclaration *declaration, shared_ptr<Environment> closure);
 
-    Value call(Interpreter *interpreter, const std::vector<Value> &arguments);
+    Value call(Interpreter *interpreter, const vector<Value> &arguments);
 
     int arity() const;
 
-    std::string getName() const;
+    string getName() const;
 
 private:
     FunctionDeclaration *declaration_;
-    std::shared_ptr<Environment> closure_;
+    shared_ptr<Environment> closure_;
 };
 
 #endif // FUNCTION_H

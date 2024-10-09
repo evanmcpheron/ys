@@ -154,14 +154,12 @@ bool Lexer::isIdentifierStart(char firstChar) {
 
 Token Lexer::numberLiteral(char firstChar) {
     string lexeme(1, firstChar);
-    bool isFloat = false;
 
     while (!isAtEnd() && isdigit(peekNext())) {
         lexeme += advance();
     }
 
     if (peekNext() == '.' && isdigit(peek())) {
-        isFloat = true;
         lexeme += advance(); // Consume '.'
 
         while (!isAtEnd() && isdigit(peekNext())) {
@@ -171,7 +169,6 @@ Token Lexer::numberLiteral(char firstChar) {
 
     // Handle exponential notation
     if (peek() == 'e' || peek() == 'E') {
-        isFloat = true;
         lexeme += advance(); // Consume 'e' or 'E'
 
         if (peek() == '+' || peek() == '-') {
@@ -183,9 +180,7 @@ Token Lexer::numberLiteral(char firstChar) {
         }
     }
 
-    TokenType type = isFloat ? TokenType::DOUBLE_LITERAL : TokenType::INTEGER_LITERAL;
-
-    return Token{type, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
+    return Token{TokenType::DOUBLE_LITERAL, lexeme, line, column - static_cast<int>(lexeme.length()) + 1};
 }
 
 bool Lexer::isNumberLiteral(char firstChar) {
