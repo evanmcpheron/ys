@@ -8,8 +8,11 @@
 using namespace std;
 
 
-Interpreter::~Interpreter() {
+Interpreter::Interpreter()
+    : environment_(make_shared<Environment>()) // Initialize with a new Environment
+{
 }
+
 
 void Interpreter::interpret(const vector<unique_ptr<Statement> > &statements) {
     try {
@@ -32,8 +35,15 @@ Value Interpreter::visitLiteralExpression(LiteralExpression *expression) {
     return Value(this->lastValue);
 }
 
+
 Value Interpreter::visitIdentifierExpression(IdentifierExpression *expression) {
-    return Value();
+    string variableName = expression->getName();
+
+    // Look up the variable's value in the environment
+    Value value = environment_->get(variableName);
+    setLastValue(value);
+
+    return value;
 }
 
 Value Interpreter::visitBinaryExpression(BinaryExpression *expression) {
@@ -129,7 +139,16 @@ Value Interpreter::visitUnaryExpression(UnaryExpression *expression) {
 }
 
 Value Interpreter::visitAssignmentExpression(AssignmentExpression *expression) {
-    return Value();
+    string variableName = expression->getName();
+
+    // Evaluate the right-hand side of the assignment
+    expression->getValue()->accept(*this);
+    Value value = lastValue;
+
+    // Assign the evaluated value to the variable in the environment
+    environment_->assign(variableName, value);
+
+    return value;
 }
 
 Value Interpreter::visitLogicalExpression(LogicalExpression *expression) {
@@ -149,7 +168,37 @@ void Interpreter::visitExpressionStatement(ExpressionStatement *statement) {
 }
 
 void Interpreter::visitVariableDeclaration(VariableDeclaration *statement) {
+    // Ensure that the statement is valid
+    if (!statement) {
+        throw std::runtime_error("Null pointer passed to visitVariableDeclaration.");
+    }
+
+    string variableName = statement->getName();
+
+    // Ensure that the environment is valid
+    if (!environment_) {
+        throw std::runtime_error("Environment is not initialized.");
+    }
+
+    // Evaluate the initializer if it exists, or set it to a default value
+    Value value;
+    if (statement->hasInitializer()) {
+        // Check that the initializer is not null
+        if (!statement->getInitializer()) {
+            throw std::runtime_error("Null initializer in VariableDeclaration.");
+        }
+
+        // Evaluate the initializer expression
+        statement->getInitializer()->accept(*this);
+        value = lastValue;
+    } else {
+        value = Value(); // Default value (could be null or undefined)
+    }
+    bool isConst = statement->getTypeName() == "const";
+    // Define the variable in the current environment
+    environment_->define(variableName, value, isConst);
 }
+
 
 void Interpreter::visitBlockStatement(BlockStatement *statement) {
 }

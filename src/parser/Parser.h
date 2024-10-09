@@ -10,13 +10,13 @@
 
 class Parser {
 public:
-    Parser(const std::vector<Token> &tokens);
+    Parser(const vector<Token> &tokens);
 
     // Parses the entire input and returns a list of statements
-    std::vector<std::unique_ptr<Statement> > parse();
+    vector<unique_ptr<Statement> > parse();
 
 private:
-    const std::vector<Token> &tokens_;
+    const vector<Token> &tokens_;
     size_t current_;
 
     // Helper methods
@@ -30,59 +30,59 @@ private:
 
     bool check(TokenType type) const;
 
-    bool match(const std::vector<TokenType> &types);
+    bool match(const vector<TokenType> &types);
 
-    Token consume(TokenType type, const std::string &errorMessage);
+    Token consume(TokenType type, const string &errorMessage);
 
     // Parsing methods
-    std::unique_ptr<Statement> declaration();
+    unique_ptr<Statement> declaration();
 
-    std::unique_ptr<Statement> variableDeclaration();
+    unique_ptr<Statement> variableDeclaration();
 
-    std::unique_ptr<Statement> functionDeclaration();
+    unique_ptr<Statement> functionDeclaration();
 
-    std::unique_ptr<Statement> statement();
+    unique_ptr<Statement> statement();
 
-    std::unique_ptr<Statement> ifStatement();
+    unique_ptr<Statement> ifStatement();
 
-    std::unique_ptr<Statement> whileStatement();
+    unique_ptr<Statement> whileStatement();
 
-    std::unique_ptr<Statement> forStatement();
+    unique_ptr<Statement> forStatement();
 
-    std::unique_ptr<Statement> returnStatement();
+    unique_ptr<Statement> returnStatement();
 
-    std::unique_ptr<Statement> blockStatement();
+    unique_ptr<Statement> blockStatement();
 
-    std::unique_ptr<Statement> expressionStatement();
+    unique_ptr<Statement> expressionStatement();
 
-    std::unique_ptr<Expression> expression();
+    unique_ptr<Expression> expression();
 
-    std::unique_ptr<Expression> assignment();
+    unique_ptr<Expression> assignment();
 
-    std::unique_ptr<Expression> logicalOr();
+    unique_ptr<Expression> logicalOr();
 
-    std::unique_ptr<Expression> logicalAnd();
+    unique_ptr<Expression> logicalAnd();
 
-    std::unique_ptr<Expression> equality();
+    unique_ptr<Expression> equality();
 
-    std::unique_ptr<Expression> comparison();
+    unique_ptr<Expression> comparison();
 
-    std::unique_ptr<Expression> term();
+    unique_ptr<Expression> term();
 
-    std::unique_ptr<Expression> factor();
+    unique_ptr<Expression> factor();
 
-    std::unique_ptr<Expression> unary();
+    unique_ptr<Expression> unary();
 
-    std::unique_ptr<Expression> call();
+    unique_ptr<Expression> call();
 
-    std::unique_ptr<Expression> finishCall(std::unique_ptr<Expression> callee);
+    unique_ptr<Expression> finishCall(unique_ptr<Expression> callee);
 
-    std::unique_ptr<Expression> primary();
+    unique_ptr<Expression> primary();
 
     // Error handling
     void synchronize();
 
-    void error(const Token &token, const std::string &message);
+    void error(const Token &token, const string &message);
 };
 
 #endif // PARSER_H

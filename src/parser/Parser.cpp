@@ -78,7 +78,7 @@ unique_ptr<Statement> Parser::variableDeclaration() {
     TokenType varType = previous().type; // VAR, LET, or CONST
     Token name = consume(TokenType::IDENTIFIER, "Expected variable name.");
 
-    string typeName = "var"; // Default type (can be adjusted as needed)
+    string typeName = varType == TokenType::CONST ? "const" : "let"; // Default type (can be adjusted as needed)
     if (match({TokenType::COLON})) {
         Token typeToken = consume(TokenType::IDENTIFIER, "Expected type name.");
         typeName = typeToken.value;
@@ -247,25 +247,65 @@ unique_ptr<Expression> Parser::expression() {
 }
 
 unique_ptr<Expression> Parser::assignment() {
-    auto expr = logicalOr();
+    auto expr = logicalOr(); // Parse a higher-precedence expression first
 
     if (match({
         TokenType::ASSIGN, TokenType::PLUS_ASSIGN, TokenType::MINUS_ASSIGN, TokenType::MULTIPLY_ASSIGN,
         TokenType::DIVIDE_ASSIGN, TokenType::MODULO_ASSIGN
     })) {
-        Token op = previous();
-        auto value = assignment();
+        Token op = previous(); // The assignment operator token
+        auto value = assignment(); // Recursively parse the right-hand side
 
+        // Check if the left-hand side is a valid assignment target
         if (auto varExpr = dynamic_cast<IdentifierExpression *>(expr.get())) {
             string name = varExpr->getName();
+
+            // If it's a compound assignment, we need to apply the binary operation
+            if (op.type != TokenType::ASSIGN) {
+                // Create a binary expression: `a += b` becomes `a = a + b`
+                BinaryExpression::Operator binaryOp;
+                switch (op.type) {
+                    case TokenType::PLUS_ASSIGN:
+                        binaryOp = BinaryExpression::Operator::ADD;
+                        break;
+                    case TokenType::MINUS_ASSIGN:
+                        binaryOp = BinaryExpression::Operator::SUBTRACT;
+                        break;
+                    case TokenType::MULTIPLY_ASSIGN:
+                        binaryOp = BinaryExpression::Operator::MULTIPLY;
+                        break;
+                    case TokenType::DIVIDE_ASSIGN:
+                        binaryOp = BinaryExpression::Operator::DIVIDE;
+                        break;
+                    case TokenType::MODULO_ASSIGN:
+                        binaryOp = BinaryExpression::Operator::MODULO;
+                        break;
+                    default:
+                        binaryOp = BinaryExpression::Operator::UNKNOWN;
+                        break;
+                }
+
+                // Create the binary expression `a + b`, `a - b`, etc.
+                auto binaryExpr = make_unique<BinaryExpression>(make_unique<IdentifierExpression>(name),
+                                                                // Left-hand side (`a`)
+                                                                binaryOp, // Operator (`+`, `-`, etc.)
+                                                                move(value) // Right-hand side (`b`)
+                );
+
+                // Now return an assignment expression: `a = a + b`
+                return make_unique<AssignmentExpression>(name, move(binaryExpr), TokenType::ASSIGN);
+            }
+
+            // If it's a simple assignment, return it as is
             return make_unique<AssignmentExpression>(name, move(value), op.type);
         } else {
             error(op, "Invalid assignment target.");
         }
     }
 
-    return expr;
+    return expr; // If no assignment, return the original expression
 }
+
 
 unique_ptr<Expression> Parser::logicalOr() {
     auto expr = logicalAnd();

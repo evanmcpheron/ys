@@ -26,7 +26,7 @@ class Statement;
 
 class Interpreter : public Visitor {
 public:
-    virtual ~Interpreter();
+    Interpreter();
 
     // Executes a list of statements (the program)
     void interpret(const vector<unique_ptr<Statement> > &statements);

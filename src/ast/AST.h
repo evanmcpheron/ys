@@ -220,6 +220,11 @@ public:
 
     [[nodiscard]] Expression *getInitializer() const;
 
+    // Method to check if an initializer was provided
+    [[nodiscard]] bool hasInitializer() const {
+        return initializer_ != nullptr;
+    }
+
 private:
     string name_;
     string typeName_;
