@@ -13,7 +13,7 @@
 #include "src/parser/Parser.h"
 
 int main(int argc, char *argv[]) {
-    string sourceCode{"const x = 5; let y = 2; y=3; x+y;"};
+    string sourceCode{"let arr = Array.create(); arr.push(1);"};
 
     // Check if a file was provided
     if (argc > 1) {

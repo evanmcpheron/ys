@@ -33,21 +33,21 @@ public:
 
     //
     // Visitor methods for expressions
-    Value visitLiteralExpression(LiteralExpression *expression) override;
+    std::shared_ptr<Value> visitLiteralExpression(LiteralExpression *expression) override;
 
-    Value visitIdentifierExpression(IdentifierExpression *expression) override;
+    std::shared_ptr<Value> visitIdentifierExpression(IdentifierExpression *expression) override;
 
-    Value visitBinaryExpression(BinaryExpression *expression) override;
+    std::shared_ptr<Value> visitBinaryExpression(BinaryExpression *expression) override;
 
-    Value visitUnaryExpression(UnaryExpression *expression) override;
+    std::shared_ptr<Value> visitUnaryExpression(UnaryExpression *expression) override;
 
-    Value visitAssignmentExpression(AssignmentExpression *expression) override;
+    std::shared_ptr<Value> visitAssignmentExpression(AssignmentExpression *expression) override;
 
-    Value visitLogicalExpression(LogicalExpression *expression) override;
+    std::shared_ptr<Value> visitLogicalExpression(LogicalExpression *expression) override;
 
-    Value visitFunctionCallExpression(FunctionCallExpression *expression) override;
+    std::shared_ptr<Value> visitFunctionCallExpression(FunctionCallExpression *expression) override;
 
-    Value visitGetExpression(GetExpression *expression) override;
+    std::shared_ptr<Value> visitGetExpression(GetExpression *expression) override;
 
     // Visitor methods for statements
     void visitExpressionStatement(ExpressionStatement *statement) override;
@@ -64,6 +64,8 @@ public:
 
     void visitFunctionDeclaration(FunctionDeclaration *statement) override;
 
+    void ReturnException(const Value &value);
+
     // Exception class for returning from functions
     class ReturnException : public exception {
     public:
@@ -76,14 +78,17 @@ private:
     // The environment representing the current scope
     shared_ptr<Environment> environment_;
 
-    Value lastValue = Value();
+    std::shared_ptr<Value> lastValue = make_unique<Value>(Value());
 
     // Helper methods
-    void executeBlock(const vector<unique_ptr<Statement> > &statements, shared_ptr<Environment> newEnvironment);
+    static void executeBlock(const vector<unique_ptr<Statement> > &statements,
+                             const shared_ptr<Environment> &newEnvironment);
 
-    bool isTruthy(const Value &value);
+    static bool isTruthy(const shared_ptr<Value> &value);
 
-    void setLastValue(const Value &value);
+    void setLastValue(const shared_ptr<Value> &value);
+
+    void registerBuiltIns() const;
 };
 
 #endif // INTERPRETER_H

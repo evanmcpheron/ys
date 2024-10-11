@@ -7,11 +7,12 @@
 #include "../../include/Token.h"
 #include "../ast/AST.h"
 
+class Class; // Forward declaration
+class Function; // Forward declaration
+class Object; // Forward declaration
+
 using namespace std;
 
-// Forward declarations
-class Function;
-class Object;
 
 // Base class ValueType with clone and printValue methods
 class ValueType {
@@ -47,7 +48,7 @@ class BoolValue final : public ValueType {
     bool value_;
 
 public:
-    explicit BoolValue(bool value) : value_(value) {
+    explicit BoolValue(const bool value) : value_(value) {
     }
 
     void printValue() const override {
@@ -93,34 +94,88 @@ public:
         return new NullValue(*this);
     }
 
-    [[nodiscard]] nullptr_t getBaseValue() const {
+    [[nodiscard]] static nullptr_t getBaseValue() {
         return nullptr;
+    }
+};
+
+class ClassValue final : public ValueType {
+    shared_ptr<Class> value_;
+
+public:
+    explicit ClassValue(shared_ptr<Class> value) : value_(move(value)) {
+    }
+
+    void printValue() const override {
+        cout << "<Class " << value_ << ">" << endl;
+    }
+
+    [[nodiscard]] ValueType *clone() const override {
+        return new ClassValue(*this);
+    }
+
+    [[nodiscard]] shared_ptr<Class> getBaseValue() const {
+        return value_;
+    }
+};
+
+class FunctionValue final : public ValueType {
+    shared_ptr<Function> value_;
+
+public:
+    explicit FunctionValue(shared_ptr<Function> value) : value_(move(value)) {
+    }
+
+    void printValue() const override {
+        cout << "<Function>" << endl;
+    }
+
+    [[nodiscard]] ValueType *clone() const override {
+        return new FunctionValue(*this);
+    }
+
+    [[nodiscard]] shared_ptr<Function> getBaseValue() const {
+        return value_;
+    }
+};
+
+class ObjectValue final : public ValueType {
+    shared_ptr<Object> value_;
+
+public:
+    explicit ObjectValue(shared_ptr<Object> value) : value_(move(value)) {
+    }
+
+    void printValue() const override {
+        cout << "<Object>" << endl;
+    }
+
+    [[nodiscard]] ValueType *clone() const override {
+        return new ObjectValue(*this);
+    }
+
+    [[nodiscard]] shared_ptr<Object> getBaseValue() const {
+        return value_;
     }
 };
 
 // Value class that holds a shared pointer to a ValueType
 class Value {
 public:
-    explicit Value(double floating, TokenType tokenType = TokenType::DOUBLE_COLON)
-        : type(tokenType), value(make_shared<DoubleValue>(floating)) {
-    }
+    Value() = default;
 
-    explicit Value(const string &str, TokenType tokenType = TokenType::STRING_LITERAL)
-        : type(tokenType), value(make_shared<StringValue>(str)) {
-    }
+    explicit Value(double doubleValue);
 
-    explicit Value(bool boolean, TokenType tokenType = TokenType::BOOLEAN_LITERAL)
-        : type(tokenType), value(make_shared<BoolValue>(boolean)) {
-    }
+    explicit Value(const std::string &stringValue);
 
-    explicit Value(TokenType tokenType = TokenType::NULL_LITERAL)
-        : type(tokenType), value(make_shared<NullValue>()) {
-    }
+    explicit Value(bool boolValue);
 
-    // Constructor that accepts a shared_ptr<ValueType>
-    explicit Value(TokenType tokenType, shared_ptr<ValueType> val)
-        : type(tokenType), value(std::move(val)) {
-    }
+    explicit Value(std::shared_ptr<Class> classValue);
+
+    explicit Value(std::shared_ptr<Function> functionValue);
+
+    explicit Value(std::shared_ptr<Object> objectValue);
+
 
     // Copy constructor for deep copy
     Value(const Value &other)
@@ -138,15 +193,15 @@ public:
 
     // Move constructor
     Value(Value &&other) noexcept
-        : type(std::move(other.type)), value(std::move(other.value)) {
+        : type(move(other.type)), value(move(other.value)) {
         other.value = nullptr;
     }
 
     // Move assignment operator
     Value &operator=(Value &&other) noexcept {
         if (this != &other) {
-            type = std::move(other.type);
-            value = std::move(other.value);
+            type = move(other.type);
+            value = move(other.value);
             other.value = nullptr;
         }
         return *this;
@@ -172,10 +227,17 @@ public:
     }
 
     // Type checking methods
-    bool isNull() const { return type == TokenType::NULL_LITERAL; }
-    bool isBool() const { return dynamic_cast<BoolValue *>(value.get()) != nullptr; }
-    bool isDouble() const { return dynamic_cast<DoubleValue *>(value.get()) != nullptr; }
-    bool isString() const { return dynamic_cast<StringValue *>(value.get()) != nullptr; }
+    [[nodiscard]] bool isNull() const { return type == TokenType::NULL_LITERAL; }
+    [[nodiscard]] bool isBool() const { return dynamic_cast<BoolValue *>(value.get()) != nullptr; }
+    [[nodiscard]] bool isDouble() const { return dynamic_cast<DoubleValue *>(value.get()) != nullptr; }
+    [[nodiscard]] bool isString() const { return dynamic_cast<StringValue *>(value.get()) != nullptr; }
+
+    [[nodiscard]] bool isClass() const;
+
+    [[nodiscard]] bool isFunction() const;
+
+    [[nodiscard]] bool isObject() const;
+
 
     // Getters for various value types
     [[nodiscard]] bool asBool() const {
@@ -202,9 +264,15 @@ public:
         throw runtime_error("Not a string value");
     }
 
+    std::shared_ptr<Class> asClass() const;
+
+    std::shared_ptr<Function> asFunction() const;
+
+    std::shared_ptr<Object> asObject() const;
+
 private:
     TokenType type;
-    shared_ptr<ValueType> value;
+    std::shared_ptr<ValueType> value;
 
 public:
     [[nodiscard]] shared_ptr<ValueType> getValue() const {

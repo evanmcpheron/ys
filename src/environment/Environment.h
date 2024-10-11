@@ -16,7 +16,7 @@ public:
     }
 
     // Define a variable in the current environment with its const status
-    void define(const string &name, const Value &value, bool isConst = false) {
+    void define(const string &name, const shared_ptr<Value> &value, bool isConst = false) {
         if (values_.find(name) != values_.end()) {
             throw runtime_error("Variable '" + name + "' is already defined.");
         }
@@ -25,7 +25,7 @@ public:
     }
 
     // Get the value of a variable, looking in the current and outer environments
-    Value get(const string &name) {
+    shared_ptr<Value> get(const string &name) {
         if (values_.find(name) != values_.end()) {
             return values_[name];
         }
@@ -36,7 +36,7 @@ public:
     }
 
     // Assign a value to an existing variable, enforcing const rules
-    void assign(const string &name, const Value &value) {
+    void assign(const string &name, const shared_ptr<Value> &value) {
         if (values_.find(name) != values_.end()) {
             if (isConst_[name]) {
                 throw runtime_error("Cannot reassign constant variable '" + name + "'.");
@@ -50,7 +50,7 @@ public:
     }
 
 private:
-    unordered_map<string, Value> values_; // Stores variables and their values
+    unordered_map<string, shared_ptr<Value> > values_; // Stores variables and their values
     unordered_map<string, bool> isConst_; // Tracks whether a variable is const
     shared_ptr<Environment> enclosing_; // Enclosing (outer) scope
 };

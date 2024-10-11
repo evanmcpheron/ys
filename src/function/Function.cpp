@@ -1,3 +1,3 @@
 #include "Function.h"
-#include "../interpreter/Interpreter.h"
-#include <stdexcept>
+#include "value/Value.h"
+#include "object/Object.h"

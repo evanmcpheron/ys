@@ -8,6 +8,7 @@
 
 #include "../visitor/Visitor.h"
 #include "../../include/Token.h"
+#include "value/Value.h"
 
 
 using namespace std;
@@ -21,7 +22,7 @@ class ASTNode {
 public:
     virtual ~ASTNode() = default;
 
-    virtual void accept(Visitor &visitor) = 0;
+    virtual std::shared_ptr<Value> accept(Visitor &visitor) = 0;
 };
 
 // ********************
@@ -29,6 +30,7 @@ public:
 // ********************
 
 class Expression : public ASTNode {
+public:
 };
 
 class LiteralExpression : public Expression {
@@ -38,7 +40,7 @@ public:
     }
 
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] TokenType getType() const;
 
@@ -56,7 +58,7 @@ class IdentifierExpression final : public Expression {
 public:
     explicit IdentifierExpression(string name);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] const string &getName() const;
 
@@ -77,7 +79,7 @@ public:
 
     BinaryExpression(unique_ptr<Expression> left, Operator op, unique_ptr<Expression> right);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getLeft() const;
 
@@ -101,7 +103,7 @@ public:
 
     UnaryExpression(Operator op, unique_ptr<Expression> right);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Operator getOperator() const;
 
@@ -117,7 +119,7 @@ class AssignmentExpression : public Expression {
 public:
     AssignmentExpression(string name, unique_ptr<Expression> value, TokenType op);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] const string &getName() const;
 
@@ -141,7 +143,7 @@ public:
 
     LogicalExpression(unique_ptr<Expression> left, Operator op, unique_ptr<Expression> right);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getLeft() const;
 
@@ -160,7 +162,7 @@ class FunctionCallExpression : public Expression {
 public:
     FunctionCallExpression(unique_ptr<Expression> callee, vector<unique_ptr<Expression> > arguments);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getCallee() const;
 
@@ -176,7 +178,7 @@ class GetExpression : public Expression {
 public:
     GetExpression(unique_ptr<Expression> object, string name);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getObject() const;
 
@@ -199,7 +201,7 @@ class ExpressionStatement : public Statement {
 public:
     explicit ExpressionStatement(unique_ptr<Expression> expression);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getExpression() const;
 
@@ -212,7 +214,7 @@ class VariableDeclaration : public Statement {
 public:
     VariableDeclaration(string name, string typeName, unique_ptr<Expression> initializer);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] const string &getName() const;
 
@@ -236,7 +238,7 @@ class BlockStatement : public Statement {
 public:
     explicit BlockStatement(vector<unique_ptr<Statement> > statements);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] const vector<unique_ptr<Statement> > &getStatements() const;
 
@@ -249,7 +251,7 @@ class IfStatement : public Statement {
 public:
     IfStatement(unique_ptr<Expression> condition, unique_ptr<Statement> thenBranch, unique_ptr<Statement> elseBranch);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getCondition() const;
 
@@ -268,7 +270,7 @@ class WhileStatement final : public Statement {
 public:
     WhileStatement(unique_ptr<Expression> condition, unique_ptr<Statement> body);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getCondition() const;
 
@@ -284,7 +286,7 @@ class ReturnStatement : public Statement {
 public:
     explicit ReturnStatement(unique_ptr<Expression> value);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] Expression *getValue() const;
 
@@ -303,7 +305,7 @@ public:
     FunctionDeclaration(string name, vector<Parameter> parameters, string returnTypeName,
                         unique_ptr<BlockStatement> body);
 
-    void accept(Visitor &visitor) override;
+    std::shared_ptr<Value> accept(Visitor &visitor) override;
 
     [[nodiscard]] const string &getName() const;
 

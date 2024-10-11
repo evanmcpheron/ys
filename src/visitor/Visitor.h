@@ -27,21 +27,21 @@ public:
     virtual ~Visitor() = default;
 
     // Expression visitors
-    virtual Value visitLiteralExpression(LiteralExpression *expr) = 0;
+    virtual shared_ptr<Value> visitLiteralExpression(LiteralExpression *expr) = 0;
 
-    virtual Value visitIdentifierExpression(IdentifierExpression *expr) = 0;
+    virtual shared_ptr<Value> visitIdentifierExpression(IdentifierExpression *expr) = 0;
 
-    virtual Value visitBinaryExpression(BinaryExpression *expr) = 0;
+    virtual shared_ptr<Value> visitBinaryExpression(BinaryExpression *expr) = 0;
 
-    virtual Value visitUnaryExpression(UnaryExpression *expr) = 0;
+    virtual shared_ptr<Value> visitUnaryExpression(UnaryExpression *expr) = 0;
 
-    virtual Value visitAssignmentExpression(AssignmentExpression *expr) = 0;
+    virtual shared_ptr<Value> visitAssignmentExpression(AssignmentExpression *expr) = 0;
 
-    virtual Value visitLogicalExpression(LogicalExpression *expr) = 0;
+    virtual shared_ptr<Value> visitLogicalExpression(LogicalExpression *expr) = 0;
 
-    virtual Value visitFunctionCallExpression(FunctionCallExpression *expr) = 0;
+    virtual shared_ptr<Value> visitFunctionCallExpression(FunctionCallExpression *expr) = 0;
 
-    virtual Value visitGetExpression(GetExpression *expr) = 0;
+    virtual shared_ptr<Value> visitGetExpression(GetExpression *expr) = 0;
 
     // Statement visitors
     virtual void visitExpressionStatement(ExpressionStatement *stmt) = 0;

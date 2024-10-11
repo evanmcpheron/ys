@@ -1,55 +1,44 @@
 #include "Value.h"
-#include "../object/Object.h"
+#include "object/Object.h"
+#include "class/Class.h"
+#include "function/Function.h"
+
 #include <sstream>
 
 
-//
-// bool Value::asBool() const {
-// }
-//
-// int Value::asInt() const {
-// }
-//
-// double Value::asDouble() const {
-// }
-//
-// bool Value::strictEquals(const Value &other) const {
-// }
-//
-// bool Value::strictNotEquals(const Value &other) const {
-// }
-//
-// const string &Value::asString() const {
-// }
-//
-// shared_ptr<Function> Value::asFunction() const {
-// }
-//
-// shared_ptr<Object> Value::asObject() const {
-// }
-//
-// Value Value::add(const Value &left, const Value &other) const {
-//     return Value(left. + right);
-// }
+std::shared_ptr<Object> Value::asObject() const {
+    if (isClass()) {
+        return std::static_pointer_cast<Object>(asClass());
+    }
+    if (isFunction()) {
+        return std::static_pointer_cast<Object>(asFunction());
+    }
+    auto objectValue = dynamic_cast<ObjectValue *>(value.get());
+    if (objectValue) return objectValue->getBaseValue();
+    throw std::runtime_error("Not an object value");
+}
 
-//
-// Value Value::subtract(const Value &other) const {
-// }
-//
-// Value Value::multiply(const Value &other) const {
-// }
-//
-// Value Value::divide(const Value &other) const {
-// }
-//
-// bool Value::equals(const Value &other) const {
-// }
-//
-// Value Value::getProperty(const string &name) const {
-// }
-//
-// string Value::toString() const {
-// }
+shared_ptr<Class> Value::asClass() const {
+    auto classValue = dynamic_cast<ClassValue *>(value.get());
+    if (classValue) return classValue->getBaseValue();
+    throw std::runtime_error("Not a class value");
+}
 
+shared_ptr<Function> Value::asFunction() const {
+    auto functionValue = dynamic_cast<FunctionValue *>(value.get());
+    if (functionValue) return functionValue->getBaseValue();
+    throw std::runtime_error("Not a function value");
+}
 
+bool Value::isClass() const {
+    return dynamic_cast<ClassValue *>(value.get()) != nullptr;
+}
+
+bool Value::isFunction() const {
+    return dynamic_cast<FunctionValue *>(value.get()) != nullptr;
+}
+
+bool Value::isObject() const {
+    return dynamic_cast<ObjectValue *>(value.get()) != nullptr;
+}
 

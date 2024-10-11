@@ -1,30 +1,21 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
-#include <vector>
+#include <map>
 #include <string>
 #include <memory>
-#include "../ast/AST.h"
-#include "../environment/Environment.h"
-#include "../value/Value.h"
+#include <vector>
+#include "object/Object.h"
 
-class Interpreter;
-class FunctionDeclaration;
-class Environment;
+class Value; // Forward declaration
 
-class Function {
+class Function : public Object {
 public:
-    Function(FunctionDeclaration *declaration, std::shared_ptr<Environment> closure);
+    virtual ~Function() = default;
 
-    Value call(Interpreter *interpreter, const std::vector<Value> &arguments);
+    virtual std::shared_ptr<Value> call(const std::vector<std::shared_ptr<Value> > &args) = 0;
 
-    [[nodiscard]] int arity() const;
-
-    [[nodiscard]] const std::string &getName() const;
-
-private:
-    FunctionDeclaration *declaration_;
-    std::shared_ptr<Environment> closure_;
+    std::map<std::string, std::shared_ptr<Value> > properties;
 };
 
 #endif // FUNCTION_H

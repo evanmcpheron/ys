@@ -1,22 +1,20 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include <map>
 #include <string>
-#include <unordered_map>
 #include <memory>
-#include "../value/Value.h"
 
-class Object : public std::enable_shared_from_this<Object> {
+class Class;
+class Value; // Forward declaration
+
+class Object {
 public:
-    Object();
+    virtual ~Object() = default;
 
-    // Property access methods
-    void set(const std::string &name, const Value &value);
+    std::map<std::string, std::shared_ptr<Value> > fields;
 
-    Value get(const std::string &name) const;
-
-private:
-    std::unordered_map<std::string, Value> properties_;
+    std::shared_ptr<Class> classType;
 };
 
 #endif // OBJECT_H

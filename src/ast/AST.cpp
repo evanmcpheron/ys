@@ -9,9 +9,9 @@
 // ********************
 
 
-void LiteralExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> LiteralExpression::accept(Visitor &visitor) {
     cout << "LiteralExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitLiteralExpression(this);
+    return visitor.visitLiteralExpression(this);
 }
 
 TokenType LiteralExpression::getType() const {
@@ -27,9 +27,9 @@ IdentifierExpression::IdentifierExpression(string name)
     : name_(move(name)) {
 }
 
-void IdentifierExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> IdentifierExpression::accept(Visitor &visitor) {
     cout << "IdentifierExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitIdentifierExpression(this);
+    return visitor.visitIdentifierExpression(this);
 }
 
 const string &IdentifierExpression::getName() const {
@@ -44,9 +44,9 @@ BinaryExpression::BinaryExpression(unique_ptr<Expression> left, Operator op, uni
     : left_(move(left)), op_(op), right_(move(right)) {
 }
 
-void BinaryExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> BinaryExpression::accept(Visitor &visitor) {
     cout << "BinaryExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitBinaryExpression(this);
+    return visitor.visitBinaryExpression(this);
 }
 
 Expression *BinaryExpression::getLeft() const {
@@ -69,9 +69,9 @@ UnaryExpression::UnaryExpression(Operator op, unique_ptr<Expression> right)
     : op_(op), right_(move(right)) {
 }
 
-void UnaryExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> UnaryExpression::accept(Visitor &visitor) {
     cout << "UnaryExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitUnaryExpression(this);
+    return visitor.visitUnaryExpression(this);
 }
 
 UnaryExpression::Operator UnaryExpression::getOperator() const {
@@ -90,9 +90,9 @@ AssignmentExpression::AssignmentExpression(string name, unique_ptr<Expression> v
     : name_(move(name)), value_(move(value)), op_(op) {
 }
 
-void AssignmentExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> AssignmentExpression::accept(Visitor &visitor) {
     cout << "AssignmentExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitAssignmentExpression(this);
+    return visitor.visitAssignmentExpression(this);
 }
 
 const string &AssignmentExpression::getName() const {
@@ -115,9 +115,9 @@ LogicalExpression::LogicalExpression(unique_ptr<Expression> left, Operator op, u
     : left_(move(left)), op_(op), right_(move(right)) {
 }
 
-void LogicalExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> LogicalExpression::accept(Visitor &visitor) {
     cout << "LogicalExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitLogicalExpression(this);
+    return visitor.visitLogicalExpression(this);
 }
 
 Expression *LogicalExpression::getLeft() const {
@@ -140,9 +140,9 @@ FunctionCallExpression::FunctionCallExpression(unique_ptr<Expression> callee, ve
     : callee_(move(callee)), arguments_(move(arguments)) {
 }
 
-void FunctionCallExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> FunctionCallExpression::accept(Visitor &visitor) {
     cout << "FunctionCallExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitFunctionCallExpression(this);
+    return visitor.visitFunctionCallExpression(this);
 }
 
 Expression *FunctionCallExpression::getCallee() const {
@@ -161,9 +161,9 @@ GetExpression::GetExpression(unique_ptr<Expression> object, string name)
     : object_(move(object)), name_(move(name)) {
 }
 
-void GetExpression::accept(Visitor &visitor) {
+std::shared_ptr<Value> GetExpression::accept(Visitor &visitor) {
     cout << "GetExpression::accept(Visitor &visitor)" << endl;
-    visitor.visitGetExpression(this);
+    return visitor.visitGetExpression(this);
 }
 
 Expression *GetExpression::getObject() const {
@@ -182,9 +182,10 @@ ExpressionStatement::ExpressionStatement(unique_ptr<Expression> expression)
     : expression_(move(expression)) {
 }
 
-void ExpressionStatement::accept(Visitor &visitor) {
+std::shared_ptr<Value> ExpressionStatement::accept(Visitor &visitor) {
     cout << "ExpressionStatement::accept(Visitor &visitor)" << endl;
     visitor.visitExpressionStatement(this);
+    return {};
 }
 
 Expression *ExpressionStatement::getExpression() const {
@@ -199,9 +200,10 @@ VariableDeclaration::VariableDeclaration(string name, string typeName, unique_pt
     : name_(move(name)), typeName_(move(typeName)), initializer_(move(initializer)) {
 }
 
-void VariableDeclaration::accept(Visitor &visitor) {
+std::shared_ptr<Value> VariableDeclaration::accept(Visitor &visitor) {
     cout << "VariableDeclaration::accept(Visitor &visitor)" << endl;
     visitor.visitVariableDeclaration(this);
+    return {};
 }
 
 const string &VariableDeclaration::getName() const {
@@ -224,9 +226,10 @@ BlockStatement::BlockStatement(vector<unique_ptr<Statement> > statements)
     : statements_(move(statements)) {
 }
 
-void BlockStatement::accept(Visitor &visitor) {
+std::shared_ptr<Value> BlockStatement::accept(Visitor &visitor) {
     cout << "BlockStatement::accept(Visitor &visitor)" << endl;
     visitor.visitBlockStatement(this);
+    return {};
 }
 
 const vector<unique_ptr<Statement> > &BlockStatement::getStatements() const {
@@ -242,9 +245,10 @@ IfStatement::IfStatement(unique_ptr<Expression> condition, unique_ptr<Statement>
     : condition_(move(condition)), thenBranch_(move(thenBranch)), elseBranch_(move(elseBranch)) {
 }
 
-void IfStatement::accept(Visitor &visitor) {
+std::shared_ptr<Value> IfStatement::accept(Visitor &visitor) {
     cout << "IfStatement::accept(Visitor &visitor)" << endl;
     visitor.visitIfStatement(this);
+    return {};
 }
 
 Expression *IfStatement::getCondition() const {
@@ -267,9 +271,10 @@ WhileStatement::WhileStatement(unique_ptr<Expression> condition, unique_ptr<Stat
     : condition_(move(condition)), body_(move(body)) {
 }
 
-void WhileStatement::accept(Visitor &visitor) {
+std::shared_ptr<Value> WhileStatement::accept(Visitor &visitor) {
     cout << "WhileStatement::accept(Visitor &visitor)" << endl;
     visitor.visitWhileStatement(this);
+    return {};
 }
 
 Expression *WhileStatement::getCondition() const {
@@ -288,9 +293,10 @@ ReturnStatement::ReturnStatement(unique_ptr<Expression> value)
     : value_(move(value)) {
 }
 
-void ReturnStatement::accept(Visitor &visitor) {
+std::shared_ptr<Value> ReturnStatement::accept(Visitor &visitor) {
     cout << "ReturnStatement::accept(Visitor &visitor)" << endl;
     visitor.visitReturnStatement(this);
+    return {};
 }
 
 Expression *ReturnStatement::getValue() const {
@@ -306,9 +312,10 @@ FunctionDeclaration::FunctionDeclaration(string name, vector<Parameter> paramete
     : name_(move(name)), parameters_(move(parameters)), returnTypeName_(move(returnTypeName)), body_(move(body)) {
 }
 
-void FunctionDeclaration::accept(Visitor &visitor) {
+std::shared_ptr<Value> FunctionDeclaration::accept(Visitor &visitor) {
     cout << "FunctionDeclaration::accept(Visitor &visitor)" << endl;
-    return visitor.visitFunctionDeclaration(this);
+    visitor.visitFunctionDeclaration(this);
+    return {};
 }
 
 const string &FunctionDeclaration::getName() const {
